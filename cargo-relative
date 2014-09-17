@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+import os
+import sys
+import subprocess
+import re
+
+# Python 2/3 compatibility.
+try:
+    from subprocess import DEVNULL
+except ImportError:
+    DEVNULL = open(os.devnull, 'wb')
+
+basedir = os.getcwd()
+
+while not os.path.exists("Cargo.toml") and not os.getcwd() == "/":
+    os.chdir("..")
+
+if not os.path.exists("Cargo.toml"):
+    sys.exit("Cargo.toml not found in parent directories.")
+
+path_re = re.compile(r"^(.+\.rs)(:\d+)")
+def fix_path(match):
+    return "{}{}".format(
+        os.path.relpath(match.group(1), start=basedir),
+        match.group(2)
+    )
+
+command_line = ["cargo"] + sys.argv[1:]
+cargo = subprocess.Popen(command_line, stdout=DEVNULL, stderr=subprocess.PIPE)
+for line in cargo.stderr:
+    line = line.decode('utf-8')
+    line = path_re.sub(fix_path, line)
+    sys.stderr.write(line)
+sys.exit(cargo.wait())
