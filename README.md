@@ -7,6 +7,7 @@ project directory to be relative to the current directory.
 To use it as `makeprg` put the following in `~/.vim/after/ftplugin/rust.vim`:
 
 ```VimL
+compiler rustc
 setlocal makeprg=path/to/repository/cargo-relative\ build
 ```
 
